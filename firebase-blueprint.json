@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "student": {
+      "title": "Student",
+      "description": "Informasi data siswa Sekolah Islam Mumtaz",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID unik siswa" },
+        "name": { "type": "string", "description": "Nama lengkap siswa" },
+        "className": { "type": "string", "description": "Nama kelas siswa" }
+      },
+      "required": ["id", "name", "className"]
+    },
+    "booking": {
+      "title": "Booking",
+      "description": "Pendaftaran jadwal pengambilan rapor bagi siswa oleh orang tua",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID unik registrasi jadwal" },
+        "studentId": { "type": "string", "description": "ID siswa yang bersangkutan" },
+        "studentName": { "type": "string", "description": "Nama siswa" },
+        "className": { "type": "string", "description": "Kelas" },
+        "timeSlot": { "type": "string", "description": "Jam penjemputan (e.g. 08:00)" },
+        "parentName": { "type": "string", "description": "Nama orang tua yang mengambil" },
+        "confirmed": { "type": "boolean", "description": "Status konfirmasi jadwal" },
+        "bookedAt": { "type": "string", "format": "date-time", "description": "Timestamp saat pendaftaran" }
+      },
+      "required": ["id", "studentId", "studentName", "className", "timeSlot", "parentName", "confirmed", "bookedAt"]
+    },
+    "classLimit": {
+      "title": "ClassLimit",
+      "description": "Pengaturan kuota penjemputan per-kelas",
+      "type": "object",
+      "properties": {
+        "className": { "type": "string", "description": "Nama kelas sebagai kunci" },
+        "limit": { "type": "string", "description": "Jumlah limit, e.g. '1' untuk 1 siswa per 10 menit" }
+      },
+      "required": ["className", "limit"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "student",
+      "description": "Data koleksi siswa Sekolah Islam Mumtaz"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "booking",
+      "description": "Registrasi jadwal penjemputan rapor"
+    },
+    "/classLimits/{classLimitId}": {
+      "schema": "classLimit",
+      "description": "Konfigurasi kuota per kelas"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Sistem Pengambilan Rapor Siswa",
+  "description": "Sistem pengaturan jadwal pengambilan rapor siswa secara terjadwal per kelas dengan interval 10 menit guna menghindari penumpukan di sekolah.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

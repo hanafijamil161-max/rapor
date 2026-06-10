@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Default-deny catch-all rule (Master Gate)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Function to check if ID is legitimate and clean (Denial of Wallet guard)
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Helper to validate student payload
+    function isValidStudent(data) {
+      return data.keys().hasAll(['id', 'name', 'className']) 
+        && data.keys().size() == 3
+        && data.id is string && data.id.size() <= 100
+        && data.name is string && data.name.size() <= 150
+        && data.className is string && data.className.size() <= 50;
+    }
+
+    // Helper to validate booking payload
+    function isValidBooking(data) {
+      return data.keys().hasAll(['id', 'studentId', 'studentName', 'className', 'timeSlot', 'parentName', 'confirmed', 'bookedAt'])
+        && data.keys().size() == 8
+        && data.id is string && data.id.size() <= 100
+        && data.studentId is string && data.studentId.size() <= 100
+        && data.studentName is string && data.studentName.size() <= 150
+        && data.className is string && data.className.size() <= 50
+        && data.timeSlot is string && data.timeSlot.size() <= 20
+        && data.parentName is string && data.parentName.size() <= 150
+        && data.confirmed is bool
+        && data.bookedAt is string && data.bookedAt.size() <= 50;
+    }
+
+    // Helper to validate class limit payload
+    function isValidClassLimit(data) {
+      return data.keys().hasAll(['className', 'limit'])
+        && data.keys().size() == 2
+        && data.className is string && data.className.size() <= 50
+        && data.limit is string && data.limit.size() <= 20;
+    }
+
+    // 2. Students Collection Rules
+    match /students/{studentId} {
+      allow read: if true; // Publicly readable so parents can select their children
+      allow create, update: if isValidId(studentId) && isValidStudent(request.resource.data);
+      allow delete: if true; // For admin deletion purposes
+    }
+
+    // 3. Bookings Collection Rules
+    match /bookings/{bookingId} {
+      allow read: if true; // Publicly readable to calculate slot availability
+      allow create: if isValidId(bookingId) && isValidBooking(request.resource.data);
+      allow update: if isValidId(bookingId) && isValidBooking(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 4. Class Limits Collection Rules
+    match /classLimits/{limitId} {
+      allow read: if true;
+      allow write: if isValidId(limitId) && isValidClassLimit(request.resource.data);
+    }
+  }
+}

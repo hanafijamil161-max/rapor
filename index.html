@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sekolah Islam Mumtaz - SI-RAPOR</title>
+    <script>
+      (function() {
+        // 1. Ensure FormData has prototype.keys to prevent formdata-polyfill from modifying global.fetch
+        try {
+          if (typeof window !== 'undefined') {
+            if (!window.FormData) {
+              window.FormData = class FormData {
+                append() {}
+                delete() {}
+                get() { return null; }
+                getAll() { return []; }
+                has() { return false; }
+                set() {}
+                forEach() {}
+              };
+            }
+            if (!window.FormData.prototype.keys) {
+              window.FormData.prototype.keys = function* () {};
+            }
+            if (!window.FormData.prototype.values) {
+              window.FormData.prototype.values = function* () {};
+            }
+            if (!window.FormData.prototype.entries) {
+              window.FormData.prototype.entries = function* () {};
+            }
+            if (!window.FormData.prototype[Symbol.iterator]) {
+              window.FormData.prototype[Symbol.iterator] = function* () {};
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        // 2. Try to make window.fetch writable and configurable by deleting it first or redefining it
+        try {
+          var originalFetch = window.fetch;
+          
+          // Try to delete to bypass non-writable instance property (allows prototype lookup / re-definition)
+          try {
+            delete window.fetch;
+          } catch (delErr) {}
+
+          // Redefine fetch with getter AND setter so that assignment (e.g. window.fetch = ...) works perfectly
+          var currentFetchVal = originalFetch || window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() { return currentFetchVal; },
+            set: function(val) { currentFetchVal = val; },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          // If defining on window failed, try on Window.prototype
+          try {
+            var proto = Object.getPrototypeOf(window) || Window.prototype;
+            if (proto) {
+              var currentFetchVal2 = window.fetch || originalFetch;
+              Object.defineProperty(proto, 'fetch', {
+                get: function() { return currentFetchVal2; },
+                set: function(val) { currentFetchVal2 = val; },
+                configurable: true,
+                enumerable: true
+              });
+            }
+          } catch (e2) {
+            // ignore
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
